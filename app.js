@@ -1,11 +1,26 @@
 var http = require('http');
+var fs = require('fs');
 
+// 404 response
+function send404(response)
+{
+    response.writeHead(404,{"Content-Type" : "text/plain"});
+    response.write("ERROR 404! Page not found!!");
+    response.end();
+}
+// Handling user requests
 function onRequest(request,response)
 {
-    console.log("A User made request" + request.url);
-    response.writeHead(200,{"Context-type": "text/plain"});
-    response.write("DATA HERE");
-    response.end();
+    if(request.method=='GET' && request.url == "/")
+    {
+        response.writeHead(200,{"Content-Type" : "text/html"});
+        fs.createReadStream("./index.html").pipe(response);
+    }
+    else
+    {
+
+        send404(response);
+    }
 }
 
 http.createServer(onRequest).listen(8888);
