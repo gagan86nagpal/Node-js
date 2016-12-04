@@ -1,27 +1,30 @@
+var connect = require('connect');
 var http = require('http');
 var fs = require('fs');
 
-// 404 response
-function send404(response)
-{
-    response.writeHead(404,{"Content-Type" : "text/plain"});
-    response.write("ERROR 404! Page not found!!");
-    response.end();
-}
-// Handling user requests
-function onRequest(request,response)
-{
-    if(request.method=='GET' && request.url == "/")
-    {
-        response.writeHead(200,{"Content-Type" : "text/html"});
-        fs.createReadStream("./index.html").pipe(response);
-    }
-    else
-    {
+var app=connect();
 
-        send404(response);
-    }
+// middleware 1
+function doFirst(request,response,next)
+{
+    console.log("Here i am , the first")
+    next();
+}
+// middleware 2
+function doSecond(request,response,next)
+{
+    console.log("Here i am , the second")
+    next();
 }
 
-http.createServer(onRequest).listen(8888);
-console.log("Server is now running");
+function index(request,response)
+{
+    console.log("User requested index.html");
+    response.writeHead(200,{"Content-Type" : "text/html"});
+    fs.createReadStream('./index.html').pipe(response);
+}
+app.use(doFirst);
+app.use(doSecond);
+app.use('/index',index);
+http.createServer(app).listen(8888);
+console.log("Server is running");
